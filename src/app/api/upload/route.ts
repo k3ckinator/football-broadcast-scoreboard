@@ -2,10 +2,9 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
+import { UPLOAD_DIR } from "@/lib/uploads";
 
 export const runtime = "nodejs";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_BYTES = 5 * 1024 * 1024;
 
 export async function POST(request: Request) {
@@ -32,7 +31,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(UPLOAD_DIR, filename), buffer);
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    return NextResponse.json({ url: `/api/uploads/${filename}` });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

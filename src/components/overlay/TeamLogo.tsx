@@ -1,5 +1,7 @@
 "use client";
 
+import { resolveLogoUrl } from "@/lib/logo-url";
+
 type TeamLogoSize = "scoreboard" | "event" | "embedded" | "event-embedded";
 
 const SIZES: Record<TeamLogoSize, { img: string; placeholder: string }> = {
@@ -37,11 +39,12 @@ export function TeamLogo({
   const s = SIZES[size];
   const embedded = size === "embedded" || size === "event-embedded";
 
-  if (url) {
+  const src = resolveLogoUrl(url);
+  if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={url}
+        src={src}
         alt={name}
         className={`${s.img} ${
           embedded
