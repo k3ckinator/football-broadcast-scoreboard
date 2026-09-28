@@ -13,9 +13,11 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
+    // Long-polling works on Plesk/shared hosts where WebSocket proxy returns 400.
     socket = io({
       path: "/socket.io",
-      transports: ["websocket", "polling"],
+      transports: ["polling"],
+      upgrade: false,
       autoConnect: true,
     });
   }
