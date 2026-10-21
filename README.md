@@ -54,6 +54,10 @@ npm run dev
 
 Run the control panel on the same machine (or any device on the network pointing at the server IP).
 
+## Control login
+
+Optional login for `/control` (and logo upload) uses a **separate backend**: [scoreboard-auth](https://github.com/k3ckinator/scoreboard-auth). Set `AUTH_API_URL` to that service’s base URL, or use `CONTROL_ACCESS_PASSWORD` for a simple shared password without the auth server. The OBS overlay (`/overlay`) stays public.
+
 ## Production
 
 ```bash
