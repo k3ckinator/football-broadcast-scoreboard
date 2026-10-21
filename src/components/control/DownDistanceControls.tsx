@@ -34,6 +34,9 @@ export function DownDistanceControls() {
     });
   };
 
+  const setFirstAndTen = () =>
+    emitPatch({ downNumber: 1, yardsToGo: 10, distanceKind: "yards" });
+
   return (
     <div className="rounded-lg border border-zinc-700 bg-zinc-950/60 p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -64,6 +67,13 @@ export function DownDistanceControls() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            className="mt-2 w-full rounded-lg bg-blue-950 py-2.5 text-sm font-bold text-blue-200 ring-1 ring-blue-800 hover:bg-blue-900"
+            onClick={setFirstAndTen}
+          >
+            Neues First Down
+          </button>
         </div>
 
         <div>
