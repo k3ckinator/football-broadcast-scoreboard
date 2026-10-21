@@ -2,6 +2,7 @@ import type { ScoreboardPatch, ScoreboardState } from "@/lib/types/scoreboard";
 
 export const SOCKET_EVENTS = {
   STATE_FULL: "state:full",
+  STATE_REQUEST: "state:request",
   STATE_PATCH: "state:patch",
   STATE_REPLACE: "state:replace",
   SCORE_DELTA: "score:delta",

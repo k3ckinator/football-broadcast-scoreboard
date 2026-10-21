@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { getSocket, subscribeFullState } from "@/lib/socket-client";
+import {
+  getSocket,
+  requestFullState,
+  subscribeFullState,
+} from "@/lib/socket-client";
 import { useScoreboardStore } from "@/store/useScoreboardStore";
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
@@ -10,7 +14,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const socket = getSocket();
-    const onConnect = () => setConnected(true);
+    const onConnect = () => {
+      setConnected(true);
+      requestFullState();
+    };
     const onDisconnect = () => setConnected(false);
 
     socket.on("connect", onConnect);

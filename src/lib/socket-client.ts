@@ -9,59 +9,102 @@ import type {
   TriggerPenaltyPayload,
 } from "@/lib/socket-events";
 
+type QueuedEmit = {
+  event: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: any[];
+};
+
 let socket: Socket | null = null;
+const outboundQueue: QueuedEmit[] = [];
+let queueBound = false;
+
+function flushOutboundQueue() {
+  const s = socket;
+  if (!s?.connected) return;
+  while (outboundQueue.length > 0) {
+    const item = outboundQueue.shift()!;
+    s.emit(item.event, ...item.args);
+  }
+  s.emit(SOCKET_EVENTS.STATE_REQUEST);
+}
+
+function emitQueued(event: string, ...args: unknown[]) {
+  const s = getSocket();
+  if (s.connected) {
+    s.emit(event, ...args);
+    return;
+  }
+  outboundQueue.push({ event, args });
+}
+
+function bindQueueHandlers(s: Socket) {
+  if (queueBound) return;
+  queueBound = true;
+  s.on("connect", () => {
+    flushOutboundQueue();
+  });
+}
 
 export function getSocket(): Socket {
   if (!socket) {
-    // Long-polling works on Plesk/shared hosts where WebSocket proxy returns 400.
     socket = io({
       path: "/socket.io",
       transports: ["polling"],
       upgrade: false,
-      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 4000,
+      timeout: 60_000,
     });
+    bindQueueHandlers(socket);
   }
   return socket;
 }
 
 export function emitPatch(patch: ScoreboardPatch) {
-  getSocket().emit(SOCKET_EVENTS.STATE_PATCH, patch);
+  emitQueued(SOCKET_EVENTS.STATE_PATCH, patch);
 }
 
 export function emitReplace(state: ScoreboardState) {
-  getSocket().emit(SOCKET_EVENTS.STATE_REPLACE, state);
+  emitQueued(SOCKET_EVENTS.STATE_REPLACE, state);
 }
 
 export function emitScoreDelta(payload: ScoreDeltaPayload) {
-  getSocket().emit(SOCKET_EVENTS.SCORE_DELTA, payload);
+  emitQueued(SOCKET_EVENTS.SCORE_DELTA, payload);
 }
 
 export function emitTriggerEvent(payload: TriggerEventPayload) {
-  getSocket().emit(SOCKET_EVENTS.TRIGGER_EVENT, payload);
+  emitQueued(SOCKET_EVENTS.TRIGGER_EVENT, payload);
 }
 
 export function emitTriggerPenalty(payload: TriggerPenaltyPayload) {
-  getSocket().emit(SOCKET_EVENTS.TRIGGER_PENALTY, payload);
+  emitQueued(SOCKET_EVENTS.TRIGGER_PENALTY, payload);
 }
 
 export function emitTriggerGenericFlag() {
-  getSocket().emit(SOCKET_EVENTS.TRIGGER_PENALTY, { genericOnly: true });
+  emitQueued(SOCKET_EVENTS.TRIGGER_PENALTY, { genericOnly: true });
 }
 
 export function emitClearPenalty() {
-  getSocket().emit(SOCKET_EVENTS.CLEAR_PENALTY);
+  emitQueued(SOCKET_EVENTS.CLEAR_PENALTY);
 }
 
 export function emitClearEvent() {
-  getSocket().emit(SOCKET_EVENTS.CLEAR_EVENT);
+  emitQueued(SOCKET_EVENTS.CLEAR_EVENT);
 }
 
 export function emitClockStart() {
-  getSocket().emit(SOCKET_EVENTS.CLOCK_START);
+  emitQueued(SOCKET_EVENTS.CLOCK_START);
 }
 
 export function emitClockStop() {
-  getSocket().emit(SOCKET_EVENTS.CLOCK_STOP);
+  emitQueued(SOCKET_EVENTS.CLOCK_STOP);
+}
+
+export function requestFullState() {
+  emitQueued(SOCKET_EVENTS.STATE_REQUEST);
 }
 
 export function subscribeFullState(handler: (s: ScoreboardState) => void) {

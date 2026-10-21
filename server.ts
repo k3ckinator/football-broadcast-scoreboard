@@ -2,8 +2,12 @@ import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
 import { Server as SocketIOServer } from "socket.io";
-import { defaultScoreboardState } from "./src/lib/defaults";
 import { formatGameClock, parseGameClock } from "./src/lib/game-clock";
+import {
+  initialGameState,
+  loadPersistedGameState,
+  schedulePersistGameState,
+} from "./src/lib/game-state-persistence";
 import { applyPatch, normalizeScoreboardState } from "./src/lib/merge-state";
 import { SOCKET_EVENTS } from "./src/lib/socket-events";
 import type { ScoreboardPatch, ScoreboardState } from "./src/lib/types/scoreboard";
@@ -15,11 +19,12 @@ const port = parseInt(process.env.PORT || "3000", 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-let gameState: ScoreboardState = defaultScoreboardState();
+let gameState: ScoreboardState = initialGameState();
 let clockTimer: ReturnType<typeof setInterval> | null = null;
 
 function broadcastState(io: SocketIOServer) {
   io.emit(SOCKET_EVENTS.STATE_FULL, gameState);
+  schedulePersistGameState(gameState);
 }
 
 function stopClockTimer() {
@@ -55,7 +60,13 @@ function syncClockTimer(io: SocketIOServer) {
   }
 }
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
+  const persisted = await loadPersistedGameState();
+  if (persisted) {
+    gameState = persisted;
+    console.log("> Restored scoreboard state from disk");
+  }
+
   const httpServer = createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
     handle(req, res, parsedUrl);
@@ -63,11 +74,21 @@ app.prepare().then(() => {
 
   const io = new SocketIOServer(httpServer, {
     cors: { origin: "*", methods: ["GET", "POST"] },
-    transports: ["websocket", "polling"],
+    transports: ["polling"],
+    connectionStateRecovery: {
+      maxDisconnectionDuration: 2 * 60 * 1000,
+      skipMiddlewares: true,
+    },
+    pingTimeout: 60_000,
+    pingInterval: 25_000,
   });
 
   io.on("connection", (socket) => {
     socket.emit(SOCKET_EVENTS.STATE_FULL, gameState);
+
+    socket.on(SOCKET_EVENTS.STATE_REQUEST, () => {
+      socket.emit(SOCKET_EVENTS.STATE_FULL, gameState);
+    });
 
     socket.on(SOCKET_EVENTS.STATE_PATCH, (patch: ScoreboardPatch) => {
       gameState = applyPatch(gameState, patch);
