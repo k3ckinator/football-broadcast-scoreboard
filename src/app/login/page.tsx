@@ -14,6 +14,7 @@ function LoginForm() {
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [registrationCode, setRegistrationCode] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ function LoginForm() {
                   email,
                   password,
                   displayName: creating ? displayName : undefined,
+                  registrationCode: creating ? registrationCode : undefined,
                 }
               : { password },
           ),
@@ -112,6 +114,20 @@ function LoginForm() {
           </label>
         )}
 
+        {accounts && creating && (
+          <label className="mt-4 block text-sm text-zinc-300">
+            Registrierungscode
+            <input
+              type="text"
+              autoComplete="off"
+              className="mt-2 w-full rounded-lg border border-zinc-600 bg-zinc-950 px-4 py-3 text-white"
+              value={registrationCode}
+              onChange={(e) => setRegistrationCode(e.target.value)}
+              required
+            />
+          </label>
+        )}
+
         <label className="mt-4 block text-sm text-zinc-300">
           Passwort
           <input
@@ -144,6 +160,7 @@ function LoginForm() {
             onClick={() => {
               setCreating((value) => !value);
               setError(null);
+              setRegistrationCode("");
             }}
           >
             {creating
