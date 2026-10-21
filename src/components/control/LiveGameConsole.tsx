@@ -19,6 +19,7 @@ import {
 import type { EventBannerType, Quarter, TeamState } from "@/lib/types/scoreboard";
 import { useScoreboardStore } from "@/store/useScoreboardStore";
 import { DownDistanceControls } from "./DownDistanceControls";
+import { OverlayVisibilityControl } from "./OverlayVisibilityControl";
 
 const QUARTERS: Quarter[] = ["1ST", "2ND", "3RD", "4TH", "OT"];
 
@@ -159,6 +160,10 @@ export function LiveGameConsole() {
       <p className="mb-5 text-sm text-zinc-400">
         Score, Spielzustand und Ereignisse — alles für den laufenden Broadcast.
       </p>
+
+      <div className="mb-5">
+        <OverlayVisibilityControl variant="prominent" />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <TeamScorePanel teamId="home" />

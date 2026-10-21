@@ -2,6 +2,7 @@
 
 import { emitPatch } from "@/lib/socket-client";
 import { useScoreboardStore } from "@/store/useScoreboardStore";
+import { OverlayVisibilityControl } from "./OverlayVisibilityControl";
 
 export function DisplaySettings() {
   const state = useScoreboardStore((s) => s.state);
@@ -11,14 +12,7 @@ export function DisplaySettings() {
       <span className="w-full text-xs font-bold tracking-wide text-zinc-500 uppercase">
         Overlay-Anzeige
       </span>
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={state.overlayVisible}
-          onChange={(e) => emitPatch({ overlayVisible: e.target.checked })}
-        />
-        Scoreboard sichtbar
-      </label>
+      <OverlayVisibilityControl variant="compact" />
       <label className="flex items-center gap-2">
         <input
           type="checkbox"

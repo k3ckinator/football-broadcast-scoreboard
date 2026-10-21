@@ -9,6 +9,7 @@ import { PenaltyControls } from "./PenaltyControls";
 import { PresetControls } from "./PresetControls";
 import { TeamSetupControls } from "./TeamSetupControls";
 import { ThemeControls } from "./ThemeControls";
+import { ControlAuthMenu } from "./ControlAuthMenu";
 
 export function ControlDashboard() {
   const connected = useScoreboardStore((s) => s.connected);
@@ -38,6 +39,7 @@ export function ControlDashboard() {
               />
               {connected ? "Live" : "Getrennt"}
             </span>
+            <ControlAuthMenu />
             <Link
               href="/overlay"
               target="_blank"

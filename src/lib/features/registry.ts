@@ -5,6 +5,8 @@
  */
 
 export type FeatureId =
+  | "control-auth"
+  | "overlay-blackout"
   | "play-clock"
   | "drive-tracker"
   | "player-stats"
@@ -22,6 +24,18 @@ export interface FeatureDefinition {
 }
 
 export const FEATURE_ROADMAP: FeatureDefinition[] = [
+  {
+    id: "control-auth",
+    label: "Control login",
+    description: "Password-protect /control; /overlay stays public for OBS",
+    enabled: true,
+  },
+  {
+    id: "overlay-blackout",
+    label: "Overlay blackout",
+    description: "Hide entire score bug in OBS via overlayVisible sync",
+    enabled: true,
+  },
   {
     id: "play-clock",
     label: "Play clock",
