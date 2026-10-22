@@ -1,5 +1,3 @@
-import "server-only";
-
 import { nanoid } from "nanoid";
 import { initialGameState } from "@/lib/game-state-persistence";
 import { normalizeScoreboardState } from "@/lib/merge-state";
@@ -138,4 +136,21 @@ export function countBoards(): number {
     .prepare("SELECT COUNT(*) AS c FROM boards")
     .get() as { c: number };
   return row.c;
+}
+
+export function updateBoardName(boardId: string, name: string): BoardRecord | null {
+  const board = getBoard(boardId);
+  if (!board) return null;
+  const now = Date.now();
+  getDatabase()
+    .prepare(`UPDATE boards SET name = ?, updated_at = ? WHERE id = ?`)
+    .run(name, now, boardId);
+  return { ...board, name, updatedAt: now };
+}
+
+export function deleteBoard(boardId: string): boolean {
+  const result = getDatabase()
+    .prepare("DELETE FROM boards WHERE id = ?")
+    .run(boardId);
+  return result.changes > 0;
 }

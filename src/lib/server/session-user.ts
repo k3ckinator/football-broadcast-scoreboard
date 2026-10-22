@@ -1,5 +1,3 @@
-import "server-only";
-
 import { cookies } from "next/headers";
 import {
   CONTROL_SESSION_COOKIE,
@@ -33,4 +31,14 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const ok = await verifySessionToken(token, getAuthSecret());
   if (!ok) return null;
   return { id: "shared-password", email: "control@local", displayName: "Control" };
+}
+
+/** For board APIs: local pseudo-user when auth is disabled. */
+export async function getSessionUserForBoardApi(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  if (user) return user;
+  if (!isControlAuthEnabled()) {
+    return { id: "local", email: "local@control", displayName: "Local" };
+  }
+  return null;
 }

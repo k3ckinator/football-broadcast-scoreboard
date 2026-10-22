@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ScoreboardOverlay } from "@/components/overlay/ScoreboardOverlay";
 import { useScoreboardStore } from "@/store/useScoreboardStore";
+import { BoardNameEditor } from "./BoardNameEditor";
 import { DisplaySettings } from "./DisplaySettings";
 import { LiveGameConsole } from "./LiveGameConsole";
 import { PenaltyControls } from "./PenaltyControls";
@@ -13,16 +15,29 @@ import { ControlAuthMenu } from "./ControlAuthMenu";
 
 export function ControlDashboard({ boardId }: { boardId: string }) {
   const connected = useScoreboardStore((s) => s.connected);
+  const [boardName, setBoardName] = useState("Scoreboard");
+
+  useEffect(() => {
+    void fetch(`/api/boards/${boardId}`)
+      .then((r) => r.json())
+      .then((data: { board?: { name: string } }) => {
+        if (data.board?.name) setBoardName(data.board.name);
+      })
+      .catch(() => undefined);
+  }, [boardId]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white">
-              Scoreboard Control
-            </h1>
-            <p className="text-sm text-zinc-400">
+            <BoardNameEditor
+              boardId={boardId}
+              initialName={boardName}
+              variant="header"
+              onRenamed={setBoardName}
+            />
+            <p className="mt-1 text-sm text-zinc-400">
               Einstellungen oben · Live-Steuerung unten
             </p>
           </div>

@@ -1,12 +1,12 @@
-import "server-only";
-
 import { readFile } from "node:fs/promises";
 import { gameStateFilePath, initialGameState } from "@/lib/game-state-persistence";
 import { normalizeScoreboardState } from "@/lib/merge-state";
 import type { ScoreboardState } from "@/lib/types/scoreboard";
-import { countBoards, createBoard } from "./board-repository";
+import { getAuthApiUrl } from "@/lib/auth/config";
+import { countBoards, createBoard } from "./board-store";
 
 export async function ensureDefaultBoards(): Promise<void> {
+  if (getAuthApiUrl()) return;
   if (countBoards() > 0) return;
 
   let legacy: ScoreboardState | null = null;
