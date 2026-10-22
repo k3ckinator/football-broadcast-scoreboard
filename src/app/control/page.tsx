@@ -1,5 +1,5 @@
-import { ControlDashboard } from "@/components/control/ControlDashboard";
+import { BoardHub } from "@/components/control/BoardHub";
 
-export default function ControlPage() {
-  return <ControlDashboard />;
+export default function ControlIndexPage() {
+  return <BoardHub />;
 }

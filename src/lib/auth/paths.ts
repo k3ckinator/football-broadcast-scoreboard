@@ -13,5 +13,8 @@ export function isControlAuthProtectedPath(pathname: string): boolean {
   if (pathname === "/api/upload" || pathname.startsWith("/api/upload/")) {
     return true;
   }
+  if (pathname === "/api/boards" || pathname.startsWith("/api/boards/")) {
+    return true;
+  }
   return false;
 }

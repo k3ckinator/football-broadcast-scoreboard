@@ -16,12 +16,14 @@ type QueuedEmit = {
 };
 
 let socket: Socket | null = null;
+let activeBoardId: string | null = null;
 const outboundQueue: QueuedEmit[] = [];
 let queueBound = false;
 
 function flushOutboundQueue() {
   const s = socket;
-  if (!s?.connected) return;
+  if (!s?.connected || !activeBoardId) return;
+  s.emit(SOCKET_EVENTS.BOARD_JOIN, activeBoardId);
   while (outboundQueue.length > 0) {
     const item = outboundQueue.shift()!;
     s.emit(item.event, ...item.args);
@@ -31,7 +33,7 @@ function flushOutboundQueue() {
 
 function emitQueued(event: string, ...args: unknown[]) {
   const s = getSocket();
-  if (s.connected) {
+  if (s.connected && activeBoardId) {
     s.emit(event, ...args);
     return;
   }
@@ -46,21 +48,35 @@ function bindQueueHandlers(s: Socket) {
   });
 }
 
+function createSocket(): Socket {
+  const s = io({
+    path: "/socket.io",
+    transports: ["polling"],
+    upgrade: false,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 500,
+    reconnectionDelayMax: 4000,
+    timeout: 60_000,
+  });
+  bindQueueHandlers(s);
+  return s;
+}
+
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io({
-      path: "/socket.io",
-      transports: ["polling"],
-      upgrade: false,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 500,
-      reconnectionDelayMax: 4000,
-      timeout: 60_000,
-    });
-    bindQueueHandlers(socket);
+    socket = createSocket();
   }
   return socket;
+}
+
+export function connectToBoard(boardId: string) {
+  activeBoardId = boardId;
+  const s = getSocket();
+  if (s.connected) {
+    s.emit(SOCKET_EVENTS.BOARD_JOIN, boardId);
+    s.emit(SOCKET_EVENTS.STATE_REQUEST);
+  }
 }
 
 export function emitPatch(patch: ScoreboardPatch) {

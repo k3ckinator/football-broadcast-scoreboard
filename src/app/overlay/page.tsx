@@ -1,12 +1,5 @@
-import { ScoreboardOverlay } from "@/components/overlay/ScoreboardOverlay";
+import { redirect } from "next/navigation";
 
 export default function OverlayPage() {
-  return (
-    <div
-      className="min-h-screen w-full"
-      style={{ background: "transparent" }}
-    >
-      <ScoreboardOverlay />
-    </div>
-  );
+  redirect("/control");
 }

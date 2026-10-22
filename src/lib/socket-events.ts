@@ -1,6 +1,7 @@
 import type { ScoreboardPatch, ScoreboardState } from "@/lib/types/scoreboard";
 
 export const SOCKET_EVENTS = {
+  BOARD_JOIN: "board:join",
   STATE_FULL: "state:full",
   STATE_REQUEST: "state:request",
   STATE_PATCH: "state:patch",

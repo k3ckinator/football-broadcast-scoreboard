@@ -1,5 +1,7 @@
 node_modules
 data/game-state.json
+data/scoreboards.sqlite
+data/scoreboards.sqlite-*
 .next
 out
 dist

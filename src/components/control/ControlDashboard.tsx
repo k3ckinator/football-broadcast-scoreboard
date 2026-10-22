@@ -11,7 +11,7 @@ import { TeamSetupControls } from "./TeamSetupControls";
 import { ThemeControls } from "./ThemeControls";
 import { ControlAuthMenu } from "./ControlAuthMenu";
 
-export function ControlDashboard() {
+export function ControlDashboard({ boardId }: { boardId: string }) {
   const connected = useScoreboardStore((s) => s.connected);
 
   return (
@@ -41,11 +41,17 @@ export function ControlDashboard() {
             </span>
             <ControlAuthMenu />
             <Link
-              href="/overlay"
+              href={`/overlay/${boardId}`}
               target="_blank"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
             >
               Overlay öffnen
+            </Link>
+            <Link
+              href="/control"
+              className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-bold text-zinc-200"
+            >
+              Alle Boards
             </Link>
           </div>
         </div>
@@ -96,7 +102,8 @@ export function ControlDashboard() {
 
         <section className="rounded-xl border border-dashed border-zinc-700 p-4 text-sm text-zinc-400">
           <strong className="text-zinc-200">OBS:</strong> Browser-Quelle 1920×1080
-          → <code className="text-emerald-400">/overlay</code>
+          →{" "}
+          <code className="text-emerald-400">/overlay/{boardId}</code>
         </section>
       </main>
     </div>
